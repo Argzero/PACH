@@ -27,6 +27,7 @@ def wav_to_mp3(name):
     print name + " MP3 CREATED"
     return 0
 def aiff_to_mp3(name):
+  print name + "\n  : # .aiff found\n  : # converting to mp3"
   global _mp3s
   global abspath
   if name in _mp3s:
@@ -40,6 +41,7 @@ def aiff_to_mp3(name):
     return 0
 
 def wav_to_ogg(name):
+  print name + "\n  : # .wav found\n  : # converting to ogg"
   global _oggs
   global abspath
   if name in _oggs:
@@ -53,6 +55,7 @@ def wav_to_ogg(name):
     return
     
 def ogg_to_mp3(name):
+  print name + "\n  : # .ogg found\n  : # converting to mp3"
   global _mp3s
   global abspath
   if name in _mp3s:
@@ -66,6 +69,7 @@ def ogg_to_mp3(name):
     return 0
 
 def mp3_to_ogg(name):
+  print name + "\n  : # .mp3 found\n  : # converting to ogg"
   global _oggs
   global abspath
   if name in _oggs:
@@ -79,6 +83,7 @@ def mp3_to_ogg(name):
     return
   
 def aiff_to_ogg(name):
+  print name + "\n  : # .aiff found\n  : # converting to ogg"
   global _oggs
   global abspath
   if name in _oggs:
@@ -121,6 +126,10 @@ def main():
   for aiff in aiffs:
     aiff_to_mp3(aiff)
     aiff_to_ogg(aiff)
+  for mp3 in mp3s:
+    mp3_to_ogg(mp3)
+  for ogg in oggs:
+    ogg_to_mp3(ogg)
   print "COMPLETED SUCCESSFULLY"
   time.sleep(6)
   return 0
