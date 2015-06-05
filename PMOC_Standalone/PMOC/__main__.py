@@ -1,6 +1,8 @@
 import os,sys
 import time
 from pydub import AudioSegment
+import os
+os.system('cls' if os.name == 'nt' else 'clear')
 
 abspath = os.path.abspath(raw_input("Please provide the folder of the audio files you wish\nto convert.\n\n"))
 dirs = os.listdir(abspath)
@@ -11,6 +13,58 @@ mp3s = []
 oggs = []
 _mp3s = None
 _oggs = None 
+
+file_type = {} # 'sfx':'sfx', 'music':'music', 'voice':'voice'
+file_info = {}
+
+music = {'bitrate':128000}
+sfx_range = {'bitrate':96000}
+sfx = {'bitrate':64000}
+voice_alone = {'bitrate':96000}
+voice_over_music = {'bitrate':64000}
+
+def get_bitrate(hashmap):
+  return hashmap['bitrate']
+  
+def get_info_for_type(type):
+  global music
+  global sfx
+  global sfx_range
+  global voice_alone
+  global voice_over_music
+  if(type == "music")
+    return music
+  if(type == "sfx-r")
+    return music
+  if(type == "sfx")
+    return music
+  if(type == "music")
+    return music
+    
+def infer_type(name):
+  if 'sfx' in name:
+    return 'sfx'
+  if 'music' in name:
+    return 'music'
+  if 'voice' in name:
+    return 'voice'
+  return 'unknown'
+
+def check_info(name):
+  global file_info
+  global file_type
+  os.system('cls' if os.name == 'nt' else 'clear')
+  if file_type[name] == 'unknown':
+    channel_count = (input("Mono?\n1: Mono\n2: Not Mono")==1)? 1: 2)
+    if channel_count == 1:
+      (file_info[name])[parameters] = ["-ac", "1"] # sets it to mono audio
+    else:
+      (file_info[name])[parameters] = []
+    file_type[name] = infer_type(name)
+    
+    return file_info[name]
+  else:
+    return file_info[name]
 
 def wav_to_mp3(name):
   print name + "\n  : # .wav found\n  : # converting to mp3"
@@ -105,6 +159,8 @@ def main():
   global wavs
   global aiffs
   for file in dirs:
+    file_type[file] = "unknown"
+    file_info[file] = {}
     if file.endswith("wav"):
       wavs.append(file)
     elif file.endswith("aiff"):
