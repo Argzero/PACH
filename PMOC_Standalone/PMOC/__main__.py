@@ -33,6 +33,8 @@ dirs = os.listdir(abspath)
 out_dirs = os.listdir(abspath+"/output")
 if not os.path.exists(abspath+"/output"):
   os.makedirs(abspath+"/output")
+if not os.path.exists(abspath+"/output/logs"):
+  os.makedirs(abspath+"/output/logs")
 os.chdir(abspath)
 wavs = []
 aiffs = []
@@ -285,7 +287,7 @@ def main():
     print("OGG CONVERSION CURRENTLY UNSUPPORTED SORRY!!!")
     #ogg_to_mp3(ogg)
   if output:
-    text_file = open(abspath+"/output.txt","w")
+    text_file = open(abspath+"/output/logs/output.txt","w")
     text_file.write(out_str)
     text_file.close()
   print "COMPLETED SUCCESSFULLY"
