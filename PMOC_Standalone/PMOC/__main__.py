@@ -1,4 +1,5 @@
 import os,sys
+from collections import defaultdict
 import time
 from pydub import AudioSegment
 
@@ -37,8 +38,8 @@ oggs = []
 _mp3s = None
 _oggs = None 
 
-file_type = {} # sfx, sfx-r, music, voice, voice-om
-file_info = {}
+file_type = defaultdict(str) # sfx, sfx-r, music, voice, voice-om
+file_info = defaultdict(lambda : defaultdict(str))
 
 music = {'bitrate':'96k'}
 sfx_range = {'bitrate':'96k'}
@@ -108,6 +109,7 @@ def infer_type(name):
     elif user_input == '2':
       assumed_type = 'voice' 
   return assumed_type
+
 def check_info(name):
   global file_info
   global file_type
@@ -115,7 +117,7 @@ def check_info(name):
   if file_type[name] == 'unknown':
     file_type[name] = infer_type(name)
     file_info[name] = get_info_for_type(file_type[name])
-    print("Is " + name + " Mono?\n1: Mono\n2: Not Mono");
+    print("Is " + name + " Mono?\n\n  1: Mono\n  2: Not Mono");
     user_input = getch()
     channel_count = 1 if user_input=='1' else 2
     if channel_count == 1:
@@ -130,14 +132,15 @@ def wav_to_mp3(name):
   print name + "\n  : # .wav found\n  : # converting to mp3"
   global _mp3s
   global abspath
-  info = check_info(name)
+  _export_name = os.path.splitext(name)[0]
+  info = check_info(_export_name)
   if name in _mp3s:
     print name + " MP3 EXISTS"
+    getch()
     return 1
   else:
     print name + " MP3 CREATING"
     _song = AudioSegment.from_wav(abspath+"/"+name)
-    _export_name = os.path.splitext(name)[0]
     _song.export(_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " MP3 CREATED"
     return 0
@@ -145,13 +148,14 @@ def aiff_to_mp3(name):
   print name + "\n  : # .aiff found\n  : # converting to mp3"
   global _mp3s
   global abspath
-  info = check_info(name)
+  _export_name = os.path.splitext(name)[0]
+  info = check_info(_export_name)
   if name in _mp3s:
      print name + " MP3 EXISTS"
+     getch()
      return 1
   else:
     _song = AudioSegment.from_file(abspath+"/"+name,"aac")
-    _export_name = os.path.splitext(name)[0]
     _song.export(_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " MP3 CREATED"
     return 0 
@@ -159,13 +163,14 @@ def ogg_to_mp3(name):
   print name + "\n  : # .ogg found\n  : # converting to mp3"
   global _mp3s
   global abspath
-  info = check_info(name)
+  _export_name = os.path.splitext(name)[0]
+  info = check_info(_export_name)
   if name in _mp3s:
      print name + " MP3 EXISTS"
+     getch()
      return 1
   else:
     _song = AudioSegment.from_ogg(abspath+"/"+name)
-    _export_name = os.path.splitext(name)[0]
     _song.export(_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " MP3 CREATED"
     return 0
@@ -173,13 +178,14 @@ def wav_to_ogg(name):
   print name + "\n  : # .wav found\n  : # converting to ogg"
   global _oggs
   global abspath
-  info = check_info(name)
+  _export_name = os.path.splitext(name)[0]
+  info = check_info(_export_name)
   if name in _oggs:
-    	print name + " OGG EXISTS"
-    	return 0
+    print name + " OGG EXISTS\n\npress any key to continue..."
+    getch()
+    return 0
   else:
     _song = AudioSegment.from_wav(abspath+"/"+name)
-    _export_name = os.path.splitext(name)[0]
     _song.export(_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " OGG CREATED"
     return  
@@ -187,13 +193,14 @@ def aiff_to_ogg(name):
   print name + "\n  : # .aiff found\n  : # converting to ogg"
   global _oggs
   global abspath
-  info = check_info(name)
+  _export_name = os.path.splitext(name)[0]
+  info = check_info(_export_name)
   if name in _oggs:
-    print name + " OGG EXISTS"
+    print name + " OGG EXISTS\n\npress any key to continue..."
+    getch()
     return
   else:
     _song = AudioSegment.from_file(abspath+"/"+name,"aac")
-    _export_name = os.path.splitext(name)[0]
     _song.export(_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " OGG CREATED"
     return 
@@ -201,13 +208,14 @@ def mp3_to_ogg(name):
   print name + "\n  : # .mp3 found\n  : # converting to ogg"
   global _oggs
   global abspath
-  info = check_info(name)
+  _export_name = os.path.splitext(name)[0]
+  info = check_info(_export_name)
   if name in _oggs:
-    print name + " OGG EXISTS"
+    print name + " OGG EXISTS\n\npress any key to continue..."
+    getch()
     return 0
   else:
     _song = AudioSegment.from_mp3(abspath+"/"+name)
-    _export_name = os.path.splitext(name)[0]
     _song.export(_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " OGG CREATED"
     return
