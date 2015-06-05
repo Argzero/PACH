@@ -28,8 +28,11 @@ getch = _find_getch()
 
 os.system('cls' if os.name == 'nt' else 'clear')
 
-abspath = os.path.abspath(raw_input("Please provide the folder of the audio files you wish\nto convert.\n\n"))
+abspath = os.path.abspath(raw_input("Please provide the folder of the audio files you wish\nto convert.\n\n").strip())
 dirs = os.listdir(abspath)
+out_dirs = os.listdir(abspath+"/output")
+if not os.path.exists(abspath+"/output"):
+  os.makedirs(abspath+"/output")
 os.chdir(abspath)
 wavs = []
 aiffs = []
@@ -37,6 +40,8 @@ mp3s = []
 oggs = []
 _mp3s = None
 _oggs = None 
+output = False
+out_str = ''
 
 file_type = defaultdict(str) # sfx, sfx-r, music, voice, voice-om
 file_info = defaultdict(lambda : defaultdict(str))
@@ -57,7 +62,7 @@ def get_info_for_type(type):
   global sfx_range
   global voice_alone
   global voice_over_music
-  info = {}
+  info = defaultdict(str)
   if(type == "music"):
     info['bitrate'] = get_bitrate(music)
   elif(type == "sfx-r"):
@@ -80,7 +85,6 @@ def infer_type(name):
   elif 'voice' in name:
     assumed_type = 'voice'
   if assumed_type == "unknown":
-    os.system('cls' if os.name == 'nt' else 'clear')
     print("TYPE UNCERTAIN FOR FILE\n\n"+name+"\n\nPlease Provide the type by pressing one of the characters below:\n\n  1: Music\n  2: SFX\n  3. Voice\n\n")
     user_input = getch()
     if user_input == '1':
@@ -91,7 +95,6 @@ def infer_type(name):
       assumed_type = 'voice' 
       
   if assumed_type == 'sfx':
-    os.system('cls' if os.name == 'nt' else 'clear')
     print(name + "\n\n")
     print("Does this SFX have a large range of pitches?\nPlease Provide the type by pressing one of the characters below:\n\n  1: Yes\n  2: No\n\n")
     user_input = getch()
@@ -100,7 +103,6 @@ def infer_type(name):
     elif user_input == '2':
       assumed_type = 'sfx' 
   if assumed_type == 'voice':
-    os.system('cls' if os.name == 'nt' else 'clear')
     print(name + "\n\n")
     print("Does this voice play over music or by itself?\nPlease Provide the type by pressing one of the characters below:\n\n  1: Plays over Music\n  2: Plays Alonen\n")
     user_input = getch()
@@ -113,8 +115,7 @@ def infer_type(name):
 def check_info(name):
   global file_info
   global file_type
-  os.system('cls' if os.name == 'nt' else 'clear')
-  if file_type[name] == 'unknown':
+  if file_type[name] == '' or file_type[name] == 'unknown':
     file_type[name] = infer_type(name)
     file_info[name] = get_info_for_type(file_type[name])
     print("Is " + name + " Mono?\n\n  1: Mono\n  2: Not Mono");
@@ -132,6 +133,8 @@ def wav_to_mp3(name):
   print name + "\n  : # .wav found\n  : # converting to mp3"
   global _mp3s
   global abspath
+  global out_str
+  out_str += name + " to MP3\n"
   _export_name = os.path.splitext(name)[0]
   info = check_info(_export_name)
   if name in _mp3s:
@@ -141,11 +144,13 @@ def wav_to_mp3(name):
   else:
     print name + " MP3 CREATING"
     _song = AudioSegment.from_wav(abspath+"/"+name)
-    _song.export(_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
+    _song.export("output/"+_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " MP3 CREATED"
     return 0
 def aiff_to_mp3(name):
   print name + "\n  : # .aiff found\n  : # converting to mp3"
+  global out_str
+  out_str += name + " to MP3\n"
   global _mp3s
   global abspath
   _export_name = os.path.splitext(name)[0]
@@ -156,11 +161,13 @@ def aiff_to_mp3(name):
      return 1
   else:
     _song = AudioSegment.from_file(abspath+"/"+name,"aac")
-    _song.export(_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
+    _song.export("output/"+_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " MP3 CREATED"
     return 0 
 def ogg_to_mp3(name):
   print name + "\n  : # .ogg found\n  : # converting to mp3"
+  global out_str
+  out_str += name + " to MP3\n"
   global _mp3s
   global abspath
   _export_name = os.path.splitext(name)[0]
@@ -171,11 +178,13 @@ def ogg_to_mp3(name):
      return 1
   else:
     _song = AudioSegment.from_ogg(abspath+"/"+name)
-    _song.export(_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
+    _song.export("output/"+_export_name + ".mp3", format="mp3", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " MP3 CREATED"
     return 0
 def wav_to_ogg(name):
   print name + "\n  : # .wav found\n  : # converting to ogg"
+  global out_str
+  out_str += name + " to OGG\n"
   global _oggs
   global abspath
   _export_name = os.path.splitext(name)[0]
@@ -186,11 +195,13 @@ def wav_to_ogg(name):
     return 0
   else:
     _song = AudioSegment.from_wav(abspath+"/"+name)
-    _song.export(_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
+    _song.export("output/"+_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " OGG CREATED"
     return  
 def aiff_to_ogg(name):
   print name + "\n  : # .aiff found\n  : # converting to ogg"
+  global out_str
+  out_str += name + " to OGG\n"
   global _oggs
   global abspath
   _export_name = os.path.splitext(name)[0]
@@ -201,11 +212,13 @@ def aiff_to_ogg(name):
     return
   else:
     _song = AudioSegment.from_file(abspath+"/"+name,"aac")
-    _song.export(_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
+    _song.export("output/"+_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " OGG CREATED"
     return 
 def mp3_to_ogg(name):
   print name + "\n  : # .mp3 found\n  : # converting to ogg"
+  global out_str
+  out_str += name + " to OGG\n"
   global _oggs
   global abspath
   _export_name = os.path.splitext(name)[0]
@@ -216,18 +229,26 @@ def mp3_to_ogg(name):
     return 0
   else:
     _song = AudioSegment.from_mp3(abspath+"/"+name)
-    _song.export(_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
+    _song.export("output/"+_export_name + ".ogg", format="ogg", bitrate=get_bitrate(info), parameters=get_params(info))
     print name + " OGG CREATED"
     return
     
 def main():
   global dirs
+  global out_dirs
   global _mp3s
   global _oggs
   global mp3s
   global oggs
   global wavs
   global aiffs
+  global output
+  global out_str
+  global abspath
+  print("Would you like to log all conversions?\n(export a text file with all files converted)\n\n  1: YES\n  2: NO");
+  user_input = getch()
+  if user_input == '1':
+    output = True
   for file in dirs:
     file_type[file] = "unknown"
     file_info[file] = {}
@@ -242,23 +263,31 @@ def main():
     elif file.endswith("ogg"):
       print file + "\n  : # .ogg found"
       oggs.append(file) 
+  
   _mp3s = set(mp3s)    
   _oggs = set(oggs)  
-  
+  out_str += "WAV\n----------------\n"
   for wav in wavs:
-    os.system('cls' if os.name == 'nt' else 'clear')
     wav_to_mp3(wav)
     wav_to_ogg(wav)
+  
+  out_str += "AIFF\n----------------\n"
   for aiff in aiffs:
-    os.system('cls' if os.name == 'nt' else 'clear')
     aiff_to_mp3(aiff)
     aiff_to_ogg(aiff)
+  
+  out_str += "MP3\n----------------\n"
   for mp3 in mp3s:
-    os.system('cls' if os.name == 'nt' else 'clear')
     mp3_to_ogg(mp3)
+  
+  out_str += "OGG\n----------------\nOGG CONVERSION CURRENTLY UNSUPPORTED SORRY!!!\n"
   for ogg in oggs:
-    os.system('cls' if os.name == 'nt' else 'clear')
-    ogg_to_mp3(ogg)
+    print("OGG CONVERSION CURRENTLY UNSUPPORTED SORRY!!!")
+    #ogg_to_mp3(ogg)
+  if output:
+    text_file = open(abspath+"/output.txt","w")
+    text_file.write(out_str)
+    text_file.close()
   print "COMPLETED SUCCESSFULLY"
   time.sleep(3)
   return 0
